@@ -39,22 +39,41 @@ int main(int argc, char const *argv[])
     // Finish and clean up the MeMS system
     mems_finish();
     
-    mems_init();
+mems_init();
 
+    printf("Allocated virtual addresses [mems_malloc]\n");
     void* mem1 = mems_malloc(1000);
-   void* mem2 = mems_malloc(2000);
+    void* mem2 = mems_malloc(2000);
+    void* mem3 = mems_malloc(1000);
+    void* mem4 = mems_malloc(1000);
+    void* mem5 = mems_malloc(600);
 
-   printf("Memory 1: %p\n", mem1);
-   printf("Memory 2: %p\n", mem2);
+    printf("Virtual address: %lu\n", (unsigned long)mem1);
+    printf("Virtual address: %lu\n", (unsigned long)mem2);
+    printf("Virtual address: %lu\n", (unsigned long)mem3);
+    printf("Virtual address: %lu\n", (unsigned long)mem4);
+    printf("Virtual address: %lu\n", (unsigned long)mem5);
 
-   mems_print_stats();
+    printf("------ Assigning value to Virtual address [mems_get] -----\n");
+    // how to write to the virtual address of the MeMS (this is given to show that the system works on arrays as well)
+    //int* phy_ptr = (int*)mems_get(mem1 + 4); // get the address of index 1
+    phy_ptr[0] = 200; // put value at index 1
+    //int* phy_ptr2 = (int*)mems_get(mem1); // get the address of index 0
+    printf("Virtual address: %lu\tPhysical Address: %lu\n", (unsigned long)mem1, (unsigned long)phy_ptr2);
+    printf("Value written: %d\n", phy_ptr2[1]); // print the address of index 1
 
-    mems_free(mem1);
+    printf("Printing Stats [mems_print_stats]\n");
+    mems_print_stats();
+
+    printf("Freeing up the memory [mems_free]\n");
     mems_free(mem2);
+    mems_free(mem4);
 
     mems_print_stats();
 
+    printf("Unmapping all memory [mems_finish]\n");
     mems_finish();
+
     return 0;
     
     

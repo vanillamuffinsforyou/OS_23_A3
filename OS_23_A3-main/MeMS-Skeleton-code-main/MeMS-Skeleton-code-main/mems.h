@@ -130,23 +130,46 @@ void mems_free(void* ptr) {
 
 // Function to print memory statistics
 void mems_print_stats() {
-    // Print total mapped pages, unused memory, main chain nodes, and sub-chain nodes
-    int main_chain_node_count = 1;
+    printf("MEMS SYSTEM STATS\n");
 
     MainChainNode* current_main_chain = free_list_head->next;
+    int main_chain_length = 0;
+    int sub_chain_lengths[100]; // Assuming at most 100 sub-chains
+    int sub_chain_index = 0;
+
     while (current_main_chain != free_list_head) {
+        printf("MAIN [%lu:%lu]-> ", (unsigned long)current_main_chain->sub_chain->start, (unsigned long)current_main_chain->sub_chain->start + current_main_chain->sub_chain->size - 1);
+
         SubChainNode* current_sub_chain = current_main_chain->sub_chain;
-        printf("Sub-Chain %d:\n", main_chain_node_count);
         while (current_sub_chain != NULL) {
-            printf("  Type: %s, Size: %lu bytes\n", (current_sub_chain->type == PROCESS) ? "PROCESS" : "HOLE", current_sub_chain->size);
+            printf("%c[%lu:%lu] <-> ",
+                (current_sub_chain->type == PROCESS) ? 'P' : 'H',
+                (unsigned long)current_sub_chain->start,
+                (unsigned long)current_sub_chain->start + current_sub_chain->size - 1);
+
+            if (current_sub_chain->type == HOLE) {
+                sub_chain_lengths[sub_chain_index]++;
+            }
+
             current_sub_chain = current_sub_chain->next;
         }
-        main_chain_node_count++;
+
+        printf("NULL\n");
+        main_chain_length++;
         current_main_chain = current_main_chain->next;
+        sub_chain_lengths[++sub_chain_index] = 0;
     }
 
-    printf("Total Mapped Pages: %d\n", total_mapped_pages);
-    printf("Total Unused Memory: %lu bytes\n", total_unused_memory);
+    printf("Pages used:\n");
+    printf("%d\n", total_mapped_pages);
+    printf("Space unused: %lu bytes\n", total_unused_memory);
+    printf("Main Chain Length:\n");
+    printf("%d\n", main_chain_length);
+    printf("Sub-chain Length array: [");
+    for (int i = 0; i < sub_chain_index; i++) {
+        printf("%d, ", sub_chain_lengths[i]);
+    }
+    printf("%d]\n", sub_chain_lengths[sub_chain_index]);
 }
 
 // Function to get physical address mapped to MeMS virtual address
@@ -154,8 +177,5 @@ void* mems_get(void* v_ptr) {
     // Calculate physical address (which is the same for MeMS)
     return v_ptr;
 }
-
-
-
 
 
